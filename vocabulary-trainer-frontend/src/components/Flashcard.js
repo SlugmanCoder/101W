@@ -7,7 +7,7 @@ const Flashcard = () => {
   const [showAnswer, setShowAnswer] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/vocabulary/random/10')
+    fetch('http://localhost:5001/api/vocabulary/random/10')
       .then(res => res.json())
       .then(data => setFlashcards(data))
       .catch(err => console.error(err));
