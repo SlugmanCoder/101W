@@ -1,110 +1,95 @@
-import React, { useState, useEffect } from "react";
-import "bootstrap-icons/font/bootstrap-icons.css";
+import React, { useEffect, useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const QuizPage = () => {
   const [questions, setQuestions] = useState([]);
-  const [current, setCurrent] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
-  const [finished, setFinished] = useState(false);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [feedback, setFeedback] = useState(null);
+  const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
-    fetchRandomWords();
+    fetch("http://localhost:5000/api/vocabulary/random/25")
+      .then((res) => res.json())
+      .then((data) => setQuestions(data))
+      .catch((err) => console.error("Error fetching questions:", err));
   }, []);
 
-  const fetchRandomWords = async () => {
+  const current = questions[currentIndex];
+  const options = questions.length
+    ? [...questions].sort(() => 0.5 - Math.random()).slice(0, 4)
+    : [];
+
+  const handleAnswer = (option) => {
+    if (!current) return;
+    setSelectedOption(option);
+    if (option._id === current._id) {
+      setScore((prev) => prev + 1);
+      setFeedback("Correct!");
+    } else {
+      setFeedback("Oops! Try again next time.");
+    }
+    setTimeout(() => {
+      setSelectedOption(null);
+      setFeedback("");
+      if (currentIndex + 1 < questions.length) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        setShowResult(true);
+      }
+    }, 1000);
+  };
+
+  const randomizeQuestions = async () => {
     try {
-      setQuestions([]); // Clear old questions first
       const response = await fetch("http://localhost:5000/api/vocabulary/random/25");
       const data = await response.json();
       setQuestions(data);
-      setCurrent(0);
+      setCurrentIndex(0);
+      setSelectedOption(null);
+      setShowResult(false);
       setScore(0);
-      setFinished(false);
-      setSelectedAnswer(null);
-      setFeedback(null);
     } catch (error) {
-      console.error("Error fetching random words:", error);
+      console.error("Error randomizing questions:", error);
     }
   };
 
-  if (!questions.length) return <div className="text-center">Loading quiz...</div>;
+  if (!questions.length) return <div className="text-center mt-5">Loading quiz...</div>;
 
-  const currentWord = questions[current];
-  const options = [...questions]
-    .sort(() => 0.5 - Math.random())
-    .slice(0, 4);
-
-  if (!options.includes(currentWord)) {
-    options[0] = currentWord;
-    options.sort(() => 0.5 - Math.random());
-  }
-
-  const handleAnswer = (selected) => {
-    setSelectedAnswer(selected);
-    if (selected === currentWord.definition) {
-      setScore(score + 1);
-      setFeedback("✅ Correct!");
-    } else {
-      setFeedback("❌ Incorrect! Try again.");
-    }
-  };
-
-  const nextQuestion = () => {
-    if (current + 1 < questions.length) {
-      setCurrent(current + 1);
-      setSelectedAnswer(null);
-      setFeedback(null);
-    } else {
-      setFinished(true);
-    }
-  };
-
-  if (finished) {
+  if (showResult) {
     return (
-      <div className="text-center">
-        <h3>Quiz Complete! 🎉</h3>
-        <p>Your final score: <strong>{score}/{questions.length}</strong></p>
-        <button className="btn btn-primary" onClick={fetchRandomWords}>
-          <i className="bi bi-arrow-clockwise"></i> Try Again
-        </button>
+      <div className="container text-center mt-5">
+        <h2>Your Score: {score} / {questions.length}</h2>
+        <button className="btn btn-primary mt-3" onClick={randomizeQuestions}>Try Again</button>
       </div>
     );
   }
 
   return (
-    <div className="container mt-4">
-      <div className="card p-4 shadow-lg">
-        <h2 className="text-center mb-4 text-primary fw-bold">
-          <i className="bi bi-pencil-square"></i> Vocabulary Quiz
-        </h2>
-
-        {/* Randomize Words Button */}
-        <button className="btn btn-warning mb-3" onClick={fetchRandomWords}>
-          <i className="bi bi-shuffle"></i> Randomize Words
-        </button>
-
-        <h4 className="mb-3">What is the meaning of <strong className="text-primary">"{currentWord.word}"</strong>?</h4>
-
-        <div className="list-group">
-          {options.map((option, index) => (
-            <button
-              key={index}
-              className={`list-group-item list-group-item-action ${selectedAnswer === option.definition ? (option.definition === currentWord.definition ? "list-group-item-success" : "list-group-item-danger") : ""}`}
-              onClick={() => handleAnswer(option.definition)}
-              disabled={selectedAnswer !== null}
-            >
-              {option.definition}
-            </button>
-          ))}
+    <div className="container mt-5 p-4 bg-light rounded shadow">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4>Question {currentIndex + 1} of {questions.length}</h4>
+        <button className="btn btn-outline-secondary btn-sm" onClick={randomizeQuestions}>🔄 Randomize</button>
+      </div>
+      <div className="card mb-3">
+        <div className="card-body">
+          <h5 className="card-title">What is the meaning of: <strong>{current.word}</strong>?</h5>
+          <div className="row mt-3">
+            {options.map((opt) => (
+              <div className="col-md-6 mb-2" key={opt._id}>
+                <button
+                  className={`btn w-100 ${selectedOption === opt ? (opt._id === current._id ? 'btn-success' : 'btn-danger') : 'btn-outline-primary'}`}
+                  onClick={() => handleAnswer(opt)}
+                  disabled={!!selectedOption}
+                >
+                  {opt.definition}
+                </button>
+              </div>
+            ))}
+          </div>
+          {feedback && <div className="mt-3 alert alert-info text-center">{feedback}</div>}
         </div>
-
-        {feedback && <p className="mt-3 text-center">{feedback}</p>}
-
-        <button className="btn btn-primary w-100 mt-3" onClick={nextQuestion} disabled={selectedAnswer === null}>
-          <i className="bi bi-arrow-right-circle"></i> Next Question
-        </button>
       </div>
     </div>
   );
