@@ -20,6 +20,7 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use('/api/vocabulary', vocabularyRoutes);
 
 // Start server
-app.listen(5000, () => {
-  console.log('Initilized Server In Port 5000');
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+  console.log(`Initialized Server on Port ${PORT}`);
 });
