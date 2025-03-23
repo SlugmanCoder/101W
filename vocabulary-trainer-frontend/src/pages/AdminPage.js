@@ -7,6 +7,7 @@ const AdminPage = () => {
   const [words, setWords] = useState([]);
   const [message, setMessage] = useState(null);
   const [editWord, setEditWord] = useState(null);
+  const [csvFile, setCsvFile] = useState(null);
   const [editDefinition, setEditDefinition] = useState("");
   const [editExample, setEditExample] = useState("");
 
@@ -23,6 +24,40 @@ const AdminPage = () => {
       console.error("Error fetching words:", error);
     }
   };
+
+  const handleCsvUpload = (event) => {
+    const file = event.target.files[0];
+    setCsvFile(file);
+  };
+
+  const uploadCsv = async () => {
+    if (!csvFile) {
+      alert("Please choose a CSV file first.");
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append("file", csvFile);
+  
+    try {
+      const response = await fetch("http://localhost:5000/api/vocabulary/upload-csv", {
+        method: "POST",
+        body: formData,
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        alert("✅ CSV uploaded successfully!");
+        fetchWords(); // Reloads word list
+      } else {
+        alert("❌ Upload failed: " + data.error);
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("⚠️ Upload failed. Check console for details.");
+    }
+  };
+  
 
   const deleteWord = async (id) => {
     try {
