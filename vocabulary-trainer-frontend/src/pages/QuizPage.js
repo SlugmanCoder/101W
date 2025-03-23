@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { FaSyncAlt } from "react-icons/fa";
 
 const QuizPage = () => {
   const [questions, setQuestions] = useState([]);
@@ -26,10 +27,11 @@ const QuizPage = () => {
     setSelectedOption(option);
     if (option._id === current._id) {
       setScore((prev) => prev + 1);
-      setFeedback("Correct!");
+      setFeedback("✅ Correct!");
     } else {
-      setFeedback("Oops! Try again next time.");
+      setFeedback("❌ Oops! Not quite.");
     }
+
     setTimeout(() => {
       setSelectedOption(null);
       setFeedback("");
@@ -39,6 +41,14 @@ const QuizPage = () => {
         setShowResult(true);
       }
     }, 1000);
+  };
+
+  const skipQuestion = () => {
+    if (currentIndex + 1 < questions.length) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setShowResult(true);
+    }
   };
 
   const randomizeQuestions = async () => {
@@ -61,34 +71,69 @@ const QuizPage = () => {
     return (
       <div className="container text-center mt-5">
         <h2>Your Score: {score} / {questions.length}</h2>
-        <button className="btn btn-primary mt-3" onClick={randomizeQuestions}>Try Again</button>
+        <button className="btn btn-primary mt-3" onClick={randomizeQuestions}>
+          <FaSyncAlt className="me-2" />
+          Try Again
+        </button>
       </div>
     );
   }
 
   return (
     <div className="container mt-5 p-4 bg-light rounded shadow">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>Question {currentIndex + 1} of {questions.length}</h4>
-        <button className="btn btn-outline-secondary btn-sm" onClick={randomizeQuestions}>🔄 Randomize</button>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h5>Question {currentIndex + 1} of {questions.length}</h5>
+        <button className="btn btn-outline-primary" onClick={randomizeQuestions}>
+          <FaSyncAlt className="me-1" /> Randomize
+        </button>
       </div>
-      <div className="card mb-3">
+
+      <div className="card border-0 shadow-sm">
         <div className="card-body">
-          <h5 className="card-title">What is the meaning of: <strong>{current.word}</strong>?</h5>
-          <div className="row mt-3">
-            {options.map((opt) => (
-              <div className="col-md-6 mb-2" key={opt._id}>
+          <h4 className="mb-4 fw-semibold">
+            What is the meaning of: <strong className="text-primary">{current.word}</strong>?
+          </h4>
+
+          <div className="row g-3">
+            {options.map((opt, index) => (
+              <div className="col-6" key={opt._id}>
                 <button
-                  className={`btn w-100 ${selectedOption === opt ? (opt._id === current._id ? 'btn-success' : 'btn-danger') : 'btn-outline-primary'}`}
+                  className={`btn btn-lg w-100 text-start px-4 py-3 border rounded-3 ${
+                    selectedOption
+                      ? opt._id === current._id
+                        ? "btn-outline-success border-success"
+                        : selectedOption === opt
+                        ? "btn-outline-danger border-danger"
+                        : "btn-outline-secondary"
+                      : "btn-outline-primary"
+                  }`}
                   onClick={() => handleAnswer(opt)}
                   disabled={!!selectedOption}
                 >
+                  <span className="me-2 text-muted">{index + 1}</span>
                   {opt.definition}
                 </button>
               </div>
             ))}
           </div>
-          {feedback && <div className="mt-3 alert alert-info text-center">{feedback}</div>}
+
+          <div className="text-center mt-4">
+            <button
+              className={`btn ${
+                selectedOption ? "btn-secondary" : "btn-outline-secondary"
+              } px-4`}
+              onClick={skipQuestion}
+              disabled={!!selectedOption}
+            >
+              Don't know?
+            </button>
+          </div>
+
+          {feedback && (
+            <div className="mt-4 text-center fw-bold text-info fs-5">
+              {feedback}
+            </div>
+          )}
         </div>
       </div>
     </div>
