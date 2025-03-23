@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 const API_KEY = "fcefce15-5eb4-4b5d-90cb-4d4c0c6d6903"; // Replace with your actual API key
 const API_URL = "https://www.dictionaryapi.com/api/v3/references/collegiate/json/";
+const VOCAB_API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const DictionaryPage = () => {
   const [search, setSearch] = useState("");
@@ -41,7 +42,7 @@ const DictionaryPage = () => {
   const addWordToVocabulary = async () => {
     if (!wordData) return;
     try {
-      const response = await fetch("http://localhost:5000/api/vocabulary", {
+      const response = await fetch(`${API_URL}/api/vocabulary`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "animate.css";
 import { FaTrash, FaEdit, FaPlus } from "react-icons/fa";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const AdminPage = () => {
   const [words, setWords] = useState([]);
@@ -17,7 +18,7 @@ const AdminPage = () => {
 
   const fetchWords = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/vocabulary");
+      const response = await fetch(`${API_URL}/api/vocabulary`);
       const data = await response.json();
       setWords(data);
     } catch (error) {
@@ -40,7 +41,7 @@ const AdminPage = () => {
     formData.append("file", csvFile);
   
     try {
-      const response = await fetch("http://localhost:5000/api/vocabulary/upload-csv", {
+      const response = await fetch(`${API_URL}/api/vocabulary/upload-csv`, {
         method: "POST",
         body: formData,
       });
@@ -61,7 +62,7 @@ const AdminPage = () => {
 
   const deleteWord = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/vocabulary/${id}`, {
+      await fetch(`${API_URL}/api/vocabulary/${id}`, {
         method: "DELETE",
       });
       setWords(words.filter((word) => word._id !== id));
@@ -78,7 +79,7 @@ const AdminPage = () => {
 
   const saveEdit = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/vocabulary/${editWord._id}`, {
+      const response = await fetch(`${API_URL}/api/vocabulary/${editWord._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ definition: editDefinition, exampleSentence: editExample }),
