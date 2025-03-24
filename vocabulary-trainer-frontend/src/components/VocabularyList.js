@@ -4,7 +4,7 @@ const VocabularyList = () => {
   const [words, setWords] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5001/api/vocabulary')
+    fetch(`${process.env.REACT_APP_API_URL}/api/vocabulary`)
       .then(res => res.json())
       .then(data => setWords(data))
       .catch(err => console.error(err));

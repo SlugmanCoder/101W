@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaSyncAlt } from "react-icons/fa";
+import "../App.css";
+import "@fontsource/poppins";
 
 const QuizPage = () => {
   const [questions, setQuestions] = useState([]);
@@ -9,6 +10,8 @@ const QuizPage = () => {
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState("");
+  const [showContinue, setShowContinue] = useState(false);
+  const [skipped, setSkipped] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/vocabulary/random/25")
@@ -23,27 +26,24 @@ const QuizPage = () => {
     : [];
 
   const handleAnswer = (option) => {
-    if (!current) return;
+    if (!current || selectedOption) return;
     setSelectedOption(option);
-    if (option._id === current._id) {
+    const isCorrect = option._id === current._id;
+    if (isCorrect) {
       setScore((prev) => prev + 1);
-      setFeedback("✅ Correct!");
+      setFeedback("Well done!");
+      setTimeout(() => nextQuestion(), 1500);
     } else {
-      setFeedback("❌ Oops! Not quite.");
+      setFeedback("Not quite, almost there!");
+      setShowContinue(true);
     }
-
-    setTimeout(() => {
-      setSelectedOption(null);
-      setFeedback("");
-      if (currentIndex + 1 < questions.length) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        setShowResult(true);
-      }
-    }, 1000);
   };
 
-  const skipQuestion = () => {
+  const nextQuestion = () => {
+    setSelectedOption(null);
+    setFeedback("");
+    setShowContinue(false);
+    setSkipped(false);
     if (currentIndex + 1 < questions.length) {
       setCurrentIndex(currentIndex + 1);
     } else {
@@ -51,17 +51,11 @@ const QuizPage = () => {
     }
   };
 
-  const randomizeQuestions = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/vocabulary/random/25");
-      const data = await response.json();
-      setQuestions(data);
-      setCurrentIndex(0);
-      setSelectedOption(null);
-      setShowResult(false);
-      setScore(0);
-    } catch (error) {
-      console.error("Error randomizing questions:", error);
+  const handleSkip = () => {
+    if (!selectedOption) {
+      setFeedback("Try to remember it next time!");
+      setSkipped(true);
+      setTimeout(() => nextQuestion(), 1500);
     }
   };
 
@@ -71,69 +65,62 @@ const QuizPage = () => {
     return (
       <div className="container text-center mt-5">
         <h2>Your Score: {score} / {questions.length}</h2>
-        <button className="btn btn-primary mt-3" onClick={randomizeQuestions}>
-          <FaSyncAlt className="me-2" />
-          Try Again
-        </button>
+        <button className="btn btn-primary mt-3" onClick={() => window.location.reload()}>Try Again</button>
       </div>
     );
   }
 
   return (
     <div className="container mt-5 p-4 bg-light rounded shadow">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h5>Question {currentIndex + 1} of {questions.length}</h5>
-        <button className="btn btn-outline-primary" onClick={randomizeQuestions}>
-          <FaSyncAlt className="me-1" /> Randomize
-        </button>
+      <div className="mb-3">
+        <h4 className="mb-1">Question {currentIndex + 1} of {questions.length}</h4>
+        <small className="text-muted">Choose matching definition</small>
       </div>
 
-      <div className="card border-0 shadow-sm">
+      <div className="card mb-3">
         <div className="card-body">
-          <h4 className="mb-4 fw-semibold">
-            What is the meaning of: <strong className="text-primary">{current.word}</strong>?
-          </h4>
+          <h5 className="card-title">What is the meaning of: <strong>{current.word}</strong>?</h5>
+          <div className="row mt-3">
+            {options.map((opt, index) => {
+              const isCorrect = opt._id === current._id;
+              const isSelected = selectedOption && selectedOption._id === opt._id;
+              let btnClass = "quiz-option";
 
-          <div className="row g-3">
-            {options.map((opt, index) => (
-              <div className="col-6" key={opt._id}>
-                <button
-                  className={`btn btn-lg w-100 text-start px-4 py-3 border rounded-3 ${
-                    selectedOption
-                      ? opt._id === current._id
-                        ? "btn-outline-success border-success"
-                        : selectedOption === opt
-                        ? "btn-outline-danger border-danger"
-                        : "btn-outline-secondary"
-                      : "btn-outline-primary"
-                  }`}
-                  onClick={() => handleAnswer(opt)}
-                  disabled={!!selectedOption}
-                >
-                  <span className="me-2 text-muted">{index + 1}</span>
-                  {opt.definition}
-                </button>
-              </div>
-            ))}
+              if (selectedOption) {
+                if (isCorrect) btnClass += " correct";
+                else if (isSelected) btnClass += " incorrect";
+                else btnClass += " disabled";
+              }
+
+              return (
+                <div className="col-md-6 mb-3" key={opt._id}>
+                  <div
+                    className={btnClass}
+                    onClick={() => handleAnswer(opt)}
+                  >
+                    <span className="me-2">{index + 1}</span> {opt.definition}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="text-center mt-4">
-            <button
-              className={`btn ${
-                selectedOption ? "btn-secondary" : "btn-outline-secondary"
-              } px-4`}
-              onClick={skipQuestion}
-              disabled={!!selectedOption}
-            >
-              Don't know?
-            </button>
+          <div className="text-center mt-3">
+            {!selectedOption && (
+              <button
+                className="dont-know-btn"
+                onClick={handleSkip}
+              >
+                Don't know?
+              </button>
+            )}
+            {(feedback && (selectedOption || skipped)) && (
+              <div className={`quiz-feedback ${selectedOption && selectedOption._id === current._id ? 'success' : 'error'}`}>{feedback}</div>
+            )}
+            {showContinue && (
+              <button className="btn btn-primary mt-3" onClick={nextQuestion}>Continue</button>
+            )}
           </div>
-
-          {feedback && (
-            <div className="mt-4 text-center fw-bold text-info fs-5">
-              {feedback}
-            </div>
-          )}
         </div>
       </div>
     </div>

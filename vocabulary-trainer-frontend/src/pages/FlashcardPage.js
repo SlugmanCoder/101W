@@ -13,7 +13,7 @@ const FlashcardPage = () => {
   const fetchRandomFlashcards = async () => {
     try {
       setFlashcards([]);
-      const response = await fetch("http://localhost:5000/api/vocabulary/random/25");
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vocabulary/random/25`)
       const data = await response.json();
       setFlashcards(data);
       setCurrent(0);
