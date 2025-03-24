@@ -18,7 +18,8 @@ const AdminPage = () => {
 
   const fetchWords = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/vocabulary`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vocabulary`)
+
       const data = await response.json();
       setWords(data);
     } catch (error) {
@@ -48,14 +49,14 @@ const AdminPage = () => {
   
       const data = await response.json();
       if (response.ok) {
-        alert("✅ CSV uploaded successfully!");
+        alert("CSV uploaded successfully!");
         fetchWords(); // Reloads word list
       } else {
-        alert("❌ Upload failed: " + data.error);
+        alert("Upload failed: " + data.error);
       }
     } catch (error) {
       console.error("Upload error:", error);
-      alert("⚠️ Upload failed. Check console for details.");
+      alert("Upload failed. Check console for details.");
     }
   };
   

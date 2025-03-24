@@ -42,7 +42,7 @@ const DictionaryPage = () => {
   const addWordToVocabulary = async () => {
     if (!wordData) return;
     try {
-      const response = await fetch(`${API_URL}/api/vocabulary`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vocabulary`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

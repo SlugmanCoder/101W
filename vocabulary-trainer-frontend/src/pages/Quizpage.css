@@ -1,0 +1,17 @@
+.correct-option {
+    border-style: dotted !important;
+  }
+  
+  .dont-know-btn {
+    text-decoration: none;
+    outline: none;
+    border: none;
+    color: #6c63ff;
+    font-weight: 500;
+  }
+  
+  .dont-know-btn:hover,
+  .dont-know-btn:focus {
+    text-decoration: underline;
+  }
+  

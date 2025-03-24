@@ -7,7 +7,8 @@ const Quiz = () => {
   const [finished, setFinished] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:5001/api/vocabulary/random/10')
+    fetch(`${process.env.REACT_APP_API_URL}/api/vocabulary/random/10`)
+
       .then(res => res.json())
       .then(data => setQuestions(data))
       .catch(err => console.error(err));
