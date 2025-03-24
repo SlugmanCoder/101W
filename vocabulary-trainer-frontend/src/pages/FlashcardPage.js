@@ -1,69 +1,59 @@
-import React, { useState, useEffect } from "react";
-import "bootstrap-icons/font/bootstrap-icons.css";
+import React, { useEffect, useState } from "react";
 
 const FlashcardPage = () => {
-  const [flashcards, setFlashcards] = useState([]);
-  const [current, setCurrent] = useState(0);
+  const [cards, setCards] = useState([]);
+  const [index, setIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
 
   useEffect(() => {
-    fetchRandomFlashcards();
+    fetch(`${process.env.REACT_APP_API_URL}/api/vocabulary/random/25`)
+      .then((res) => res.json())
+      .then((data) => {
+        setCards(data);
+        setIndex(0);
+        setShowAnswer(false);
+      });
   }, []);
 
-  const fetchRandomFlashcards = async () => {
-    try {
-      setFlashcards([]);
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vocabulary/random/25`)
-      const data = await response.json();
-      setFlashcards(data);
-      setCurrent(0);
-      setShowAnswer(false);
-    } catch (error) {
-      console.error("Error fetching flashcards:", error);
-    }
+  const nextCard = () => {
+    setIndex((prev) => (prev + 1) % cards.length);
+    setShowAnswer(false);
   };
 
-  if (!flashcards.length) return <div className="text-center">Loading flashcards...</div>;
+  const prevCard = () => {
+    setIndex((prev) => (prev - 1 + cards.length) % cards.length);
+    setShowAnswer(false);
+  };
 
-  const currentCard = flashcards[current];
+  const current = cards[index];
 
   return (
-    <div className="container mt-4">
-      <div className="card p-4 shadow-lg text-center">
-        <h2 className="text-primary fw-bold">
-          <i className="bi bi-card-text"></i> Flashcards
-        </h2>
+    <div className="flashcard-wrapper">
+      <div className="flashcard-panel">
+        <h5 className="flashcard-progress">
+          Card {index + 1} of {cards.length}
+        </h5>
 
-        {/* Randomize Flashcards Button */}
-        <button className="btn btn-warning mb-3" onClick={fetchRandomFlashcards}>
-          <i className="bi bi-shuffle"></i> Randomize Flashcards
-        </button>
+        {current && (
+          <div className="flashcard-box" onClick={() => setShowAnswer(!showAnswer)}>
+            <p className="flashcard-word">{current.word}</p>
+            {showAnswer && (
+              <div className="flashcard-back mt-3">
+                <p className="flashcard-definition"><strong>Definition:</strong> {current.definition}</p>
+                <p className="flashcard-example"><strong>Example:</strong> {current.exampleSentence}</p>
+              </div>
+            )}
+          </div>
+        )}
 
-        <div className="border p-4 rounded">
-          <h4 className="mb-3 text-uppercase fw-bold text-primary">{currentCard.word}</h4>
-
-          {!showAnswer ? (
-            <button className="btn btn-info" onClick={() => setShowAnswer(true)}>
-              <i className="bi bi-eye"></i> Show Answer
-            </button>
-          ) : (
-            <div>
-              <p><strong>Definition:</strong> {currentCard.definition}</p>
-              <p><strong>Example:</strong> {currentCard.exampleSentence || "No example available"}</p>
-            </div>
-          )}
+        <div className="flashcard-nav mt-4">
+          <button className="btn btn-outline-custom" onClick={prevCard}>
+            Previous Flashcard
+          </button>
+          <button className="btn btn-outline-custom" onClick={nextCard}>
+            Next Flashcard
+          </button>
         </div>
-
-        <button className="btn btn-primary mt-3" onClick={() => {
-          if (current + 1 < flashcards.length) {
-            setCurrent(current + 1);
-            setShowAnswer(false);
-          } else {
-            fetchRandomFlashcards();
-          }
-        }}>
-          <i className="bi bi-arrow-right-circle"></i> Next Card
-        </button>
       </div>
     </div>
   );

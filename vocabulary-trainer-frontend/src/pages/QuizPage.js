@@ -14,7 +14,7 @@ const QuizPage = () => {
   const [skipped, setSkipped] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/vocabulary/random/25")
+    fetch(`${process.env.REACT_APP_API_URL}/api/vocabulary/random/25`)
       .then((res) => res.json())
       .then((data) => setQuestions(data))
       .catch((err) => console.error("Error fetching questions:", err));
