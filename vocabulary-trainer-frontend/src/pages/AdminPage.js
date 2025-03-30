@@ -9,6 +9,35 @@ const AdminPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingWord, setEditingWord] = useState(null);
   const [formData, setFormData] = useState({ word: '', definition: '', exampleSentence: '' });
+  const [csvFile, setCsvFile] = useState(null);
+  const [editWord, setEditWord] = useState('');
+  const [editDefinition, setEditDefinition] = useState('');
+  const [editExample, setEditExample] = useState('');
+  const [message, setMessage] = useState('');
+
+  const handleAddClick = () => {
+    setEditingWord(null);
+    setFormData({ word: '', definition: '', exampleSentence: '' });
+    setShowModal(true);
+  };
+  
+  const handleEditClick = (word) => {
+    setEditingWord(word);
+    setFormData({
+      word: word.word,
+      definition: word.definition,
+      exampleSentence: word.exampleSentence,
+    });
+    setShowModal(true);
+  };
+  
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   useEffect(() => {
     fetchWords();
@@ -76,17 +105,27 @@ const AdminPage = () => {
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/vocabulary/${editWord._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ definition: editDefinition, exampleSentence: editExample }),
-      });
-      if (response.ok) {
-        setMessage("Word updated successfully!");
-        fetchWords();
+      if (editingWord) {
+        // Update existing word
+        const response = await fetch(`http://localhost:5000/api/vocabulary/${editingWord._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            definition: formData.definition,
+            exampleSentence: formData.exampleSentence
+          }),
+        });
+        if (response.ok) {
+          setMessage("Word updated successfully!");
+          fetchWords();
+        } else {
+          alert("Failed to update word");
+        }
       } else {
+        // Add new word
         await axios.post('/api/vocabulary', formData);
       }
+  
       setShowModal(false);
       fetchWords();
     } catch (error) {
