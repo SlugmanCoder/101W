@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "animate.css";
-import { FaTrash, FaEdit, FaPlus } from "react-icons/fa";
+// Updated AdminPage.js with improved styling
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import '../App.css';
 
 const AdminPage = () => {
   const [words, setWords] = useState([]);
@@ -94,12 +95,12 @@ const AdminPage = () => {
   };
 
   return (
-    <div className="admin-container">
+    <div className="manage-container">
       <div className="admin-header">
         <h2>Manage Vocabulary</h2>
-        <div className="admin-controls">
-          <button className="btn-filled" onClick={handleAddClick}>Add Word</button>
-          <button className="btn-filled" style={{ marginLeft: '1rem' }}>Bulk Add</button>
+        <div className="admin-actions">
+          <button className="navbar-btn" onClick={handleAddClick}>Add Word</button>
+          <button className="navbar-btn">Bulk Add</button>
         </div>
       </div>
 
@@ -126,35 +127,35 @@ const AdminPage = () => {
         </tbody>
       </table>
 
-      {/* Modal */}
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-box">
-            <h3 style={{ marginBottom: '1rem' }}>{editingWord ? 'Edit Word' : 'Add New Word'}</h3>
-            <div className="modal-form">
-              <input
-                type="text"
-                name="word"
-                placeholder="Word"
-                value={formData.word}
-                onChange={handleInputChange}
-              />
-              <textarea
-                name="definition"
-                placeholder="Definition"
-                value={formData.definition}
-                onChange={handleInputChange}
-              />
-              <textarea
-                name="exampleSentence"
-                placeholder="Example Sentence"
-                value={formData.exampleSentence}
-                onChange={handleInputChange}
-              />
-              <div className="modal-buttons">
-                <button className="btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
-                <button className="btn-filled" onClick={handleSave}>Save</button>
-              </div>
+        <div className="modal-backdrop">
+          <div className="modal-dialog-centered">
+            <h5>{editingWord ? 'Edit Word' : 'Add New Word'}</h5>
+            <label className="form-label">Word</label>
+            <input
+              type="text"
+              className="form-control"
+              name="word"
+              value={formData.word}
+              onChange={handleInputChange}
+            />
+            <label className="form-label">Definition</label>
+            <textarea
+              className="form-control"
+              name="definition"
+              value={formData.definition}
+              onChange={handleInputChange}
+            />
+            <label className="form-label">Example Sentence</label>
+            <textarea
+              className="form-control"
+              name="exampleSentence"
+              value={formData.exampleSentence}
+              onChange={handleInputChange}
+            />
+            <div className="modal-buttons mt-3">
+              <button className="btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
+              <button className="btn-primary" onClick={handleSave}>Save</button>
             </div>
           </div>
         </div>
