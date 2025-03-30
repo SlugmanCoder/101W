@@ -1,6 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const cors = require('cors'); // ✅ You need this
+const corsOptions = {
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+};
 require('dotenv').config();
 
 const vocabularyRoutes = require('./routes/vocabularyRoutes');
@@ -9,7 +14,7 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
