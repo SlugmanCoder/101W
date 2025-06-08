@@ -37,6 +37,12 @@ npx nodemon index.js
 
 This runs the Express server on port `5000` by default.
 
+On macOS the default port 5000 may already be in use, so you can start the backend on another port with:
+
+```bash
+PORT=5001 npx nodemon index.js
+```
+
 ## Starting the Frontend
 
 From the frontend directory:
