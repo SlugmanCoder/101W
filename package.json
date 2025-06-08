@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cd vocabulary-trainer-frontend && npm run build",
     "start": "npx concurrently \"npm run start-backend\" \"npm run start-frontend\"",
     "start-backend": "cd vocabulary-trainer-backend && npx nodemom index.js",
     "start-frontend": "cd vocabulary-trainer-frontend && react-scripts start"
